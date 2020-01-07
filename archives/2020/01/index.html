@@ -40,17 +40,17 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
   };
 </script>
 
   <meta name="description" content="Anyway the wind blows, doesn&#39;t really matter to me...">
 <meta property="og:type" content="website">
-<meta property="og:title" content="我想吃红薯">
+<meta property="og:title" content="H4ppY1&#39;s Bizarre Adventure">
 <meta property="og:url" content="http://yoursite.com/archives/2020/01/index.html">
-<meta property="og:site_name" content="我想吃红薯">
+<meta property="og:site_name" content="H4ppY1&#39;s Bizarre Adventure">
 <meta property="og:description" content="Anyway the wind blows, doesn&#39;t really matter to me...">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="H4ppY1">
@@ -68,7 +68,7 @@
   };
 </script>
 
-  <title>Archive | 我想吃红薯</title>
+  <title>Archive | H4ppY1's Bizarre Adventure</title>
   
 
 
@@ -112,11 +112,11 @@
     <div>
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">我想吃红薯</span>
+        <span class="site-title">H4ppY1's Bizarre Adventure</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">啊喔鹅咿呜吁</p>
+        <p class="site-subtitle">YaReYaRe DA☆ZE</p>
   </div>
 
   <div class="site-nav-toggle">
@@ -137,11 +137,6 @@
     <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
 
   </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
-
-  </li>
         <li class="menu-item menu-item-tags">
 
     <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
@@ -157,9 +152,39 @@
     <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
   </ul>
 
 </nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
 </div>
     </header>
 
@@ -300,6 +325,9 @@
         <a href="mailto:h4ppy1@163.com" title="E-Mail → mailto:h4ppy1@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
       </span>
   </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
 
 
 
@@ -366,6 +394,10 @@
   
 
 
+
+
+  
+<script src="/js/local-search.js"></script>
 
 
 
