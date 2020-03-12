@@ -1,6 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Ubuntu1804搭建SSR</title>
+    <url>/2020/03/11/Ubuntu1804%E6%90%AD%E5%BB%BASSR/</url>
+    <content><![CDATA[<p>本文使用ShadowsocksR和supervisor搭建搭建SSR服务端，系统环境为Ubuntu1804。</p>
+<p>ShadowsocksR使用breakwa11的github备份存档<a href="https://github.com/shadowsocksr-backup/shadowsocksr" target="_blank" rel="noopener">https://github.com/shadowsocksr-backup/shadowsocksr</a><br>ShadowsocksR的wiki地址<a href="https://github.com/shadowsocksr-backup/shadowsocks-rss/wiki" target="_blank" rel="noopener">https://github.com/shadowsocksr-backup/shadowsocks-rss/wiki</a><br>配置步骤参考ShadowsocksR的wiki的单用户服务端配置<a href="https://github.com/shadowsocksr-backup/shadowsocks-rss/wiki/Server-Setup" target="_blank" rel="noopener">https://github.com/shadowsocksr-backup/shadowsocks-rss/wiki/Server-Setup</a><br>windows客户端下载地址<a href="https://github.com/shadowsocksr-backup/shadowsocksr-csharp/releases" target="_blank" rel="noopener">https://github.com/shadowsocksr-backup/shadowsocksr-csharp/releases</a><br>Android客户端下载地址<a href="https://github.com/shadowsocksr-backup/shadowsocksr-android/releases" target="_blank" rel="noopener">https://github.com/shadowsocksr-backup/shadowsocksr-android/releases</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh username@ip   #ssh登录到ubuntu16服务器</span><br><span class="line">sudo apt-get install python supervisor git   #安装python2 supervisor和git</span><br><span class="line">mkdir ~&#x2F;ssr    #创建存放ssr源码的目录</span><br><span class="line">cd ~&#x2F;ssr       #进入ssr目录</span><br><span class="line">git clone -b manyuser https:&#x2F;&#x2F;github.com&#x2F;shadowsocksr-backup&#x2F;shadowsocksr.git    #将github上的ShadowsocksR源码存档克隆到本地</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+<h3 id="开始搭建"><a href="#开始搭建" class="headerlink" title="开始搭建"></a>开始搭建</h3><p>这里/shadowsocksr为ssr根目录,是多用户版,这里个人使用单用户版的shadowsocksr,单用户的目录为/shadowsocksr/shadowsocks</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd shadowsocksr #进入shadowsocksr根目录</span><br><span class="line">.&#x2F;initcfg.sh  #shadowsocksr初始化配置</span><br><span class="line">cd shadowsocks    #进入单用户版目录</span><br><span class="line">python server.py -p 443 -k password -m aes-256-cfb -O auth_sha1_v4 -o http_simple #快速运行</span><br><span class="line">#这里的选项都可以改,不明白选项的含义的话建议只改端口号和密码，即修改443和password</span><br></pre></td></tr></table></figure>
+<h3 id="自启动部分"><a href="#自启动部分" class="headerlink" title="自启动部分"></a>自启动部分</h3><p>本文使用supervisor维护ShadowsocksR进程自启动。</p>
+<h4 id="1-初始化配置文件"><a href="#1-初始化配置文件" class="headerlink" title="1.初始化配置文件"></a>1.初始化配置文件</h4><pre><code>echo_supervisord_conf &gt; /etc/supervisor/supervisord.conf</code></pre><h4 id="2-修改-etc-supervisor-supervisord-conf文件内容"><a href="#2-修改-etc-supervisor-supervisord-conf文件内容" class="headerlink" title="2.修改/etc/supervisor/supervisord.conf文件内容"></a>2.修改/etc/supervisor/supervisord.conf文件内容</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;supervisor&#x2F;supervisord.conf</span><br></pre></td></tr></table></figure>
+<p>其中</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;[include] </span><br><span class="line">;files &#x3D; relative&#x2F;directory&#x2F;*.ini</span><br></pre></td></tr></table></figure>
+<p>修改为（注意：将注释修饰符“;”删除）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[include]</span><br><span class="line">files &#x3D; supervisord.d&#x2F;*.ini</span><br></pre></td></tr></table></figure>
+<p>默认的配置文件是下面这样的，但是这里有个坑需要注意，supervisord.pid 以及 supervisor.sock 是放在 /tmp 目录下，但是 /tmp 目录是存放临时文件，里面的文件是会被 Linux 系统删除的，一旦这些文件丢失，就无法再通过 supervisorctl 来执行 restart 和 stop 命令了，将只会得到 unix:///tmp/supervisor.sock 不存在的错误 。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[unix_http_server]</span><br><span class="line">;file&#x3D;&#x2F;tmp&#x2F;supervisor.sock   ; (the path to the socket file)</span><br></pre></td></tr></table></figure>
+<p>修改为 /var/run 目录，避免被系统删除（注意：将注释修饰符“;”删除）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[unix_http_server]</span><br><span class="line">file&#x3D;&#x2F;var&#x2F;run&#x2F;supervisor.sock   ; (the path to the socket file)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[supervisord]</span><br><span class="line">;logfile&#x3D;&#x2F;tmp&#x2F;supervisord.log ; (main log file;default $CWD&#x2F;supervisord.log)</span><br></pre></td></tr></table></figure>
+<p>修改为 /var/log 目录，避免被系统删除（注意：将注释修饰符“;”删除）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">logfile&#x3D;&#x2F;var&#x2F;log&#x2F;supervisor&#x2F;supervisord.log ; (main log file;default $CWD&#x2F;supervisord.log)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;pidfile&#x3D;&#x2F;tmp&#x2F;supervisord.pid ; (supervisord pidfile;default supervisord.pid)</span><br></pre></td></tr></table></figure>
+<p>修改为 /var/run 目录，避免被系统删除（注意：将注释修饰符“;”删除）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pidfile&#x3D;&#x2F;var&#x2F;run&#x2F;supervisord.pid ; (supervisord pidfile;default supervisord.pid)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[supervisorctl]</span><br><span class="line">;serverurl&#x3D;unix:&#x2F;&#x2F;&#x2F;tmp&#x2F;supervisor.sock ; use a unix:&#x2F;&#x2F; URL  for a unix socket</span><br></pre></td></tr></table></figure>
+<p>必须和’unix_http_server’里面的设定匹配，修改为 /var/run 目录，避免被系统删除（注意：将注释修饰符“;”删除）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">serverurl&#x3D;unix:&#x2F;&#x2F;&#x2F;var&#x2F;run&#x2F;supervisor.sock ; use a unix:&#x2F;&#x2F; URL  for a unix socket</span><br></pre></td></tr></table></figure>
+
+<p>增加子进程ssr，注意stdout_logfile配置路径必须存在并且拥有权限，command根据自己的需要进行更改</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[program:ssr]</span><br><span class="line">user &#x3D; root   #以root用户运行</span><br><span class="line">command &#x3D; python &#x2F;home&#x2F;ubuntu&#x2F;shadowsocksr&#x2F;shadowsocks&#x2F;server.py -p 1234 -k 567890 -m aes-256-cfb -O auth_sha1_v4 -o http_simple #启动命令，和上面一致</span><br><span class="line">autostart &#x3D; true     #开机自启动</span><br><span class="line">autorestart &#x3D; true   #自动重启</span><br><span class="line">stopasgroup &#x3D; true   #后面四项可以不要</span><br><span class="line">killasgroup &#x3D; true</span><br><span class="line">redirect_stderr &#x3D; true</span><br><span class="line">stdout_logfile &#x3D; &#x2F;home&#x2F;ubuntu&#x2F;shadowsocksr&#x2F;shadowsocks&#x2F;supervisor.log</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-运行supervisor"><a href="#3-运行supervisor" class="headerlink" title="3.运行supervisor"></a>3.运行supervisor</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo supervisord -c &#x2F;etc&#x2F;supervisor&#x2F;supervisord.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-其他"><a href="#4-其他" class="headerlink" title="4.其他"></a>4.其他</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo supervisorctl reload  #重新加载supervisor配置文件并启动打开了自动启动的进程</span><br><span class="line">sudo supervisorctl status  #查看当前supervisor各进程的状态，可以看到所有启动的子进程</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="疑难杂症"><a href="#疑难杂症" class="headerlink" title="疑难杂症"></a>疑难杂症</h3><h4 id="启动提示“Unlinking-stale-socket-var-run-supervisor-supervisor-sock”"><a href="#启动提示“Unlinking-stale-socket-var-run-supervisor-supervisor-sock”" class="headerlink" title="启动提示“Unlinking stale socket /var/run/supervisor/supervisor.sock”"></a>启动提示“Unlinking stale socket /var/run/supervisor/supervisor.sock”</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">unlink &#x2F;var&#x2F;run&#x2F;supervisor&#x2F;supervisor.sock</span><br></pre></td></tr></table></figure>
+
+<h4 id="启动提示“Unlinking-stale-socket-var-run-supervisor-sock”"><a href="#启动提示“Unlinking-stale-socket-var-run-supervisor-sock”" class="headerlink" title="启动提示“Unlinking stale socket /var/run/supervisor.sock”"></a>启动提示“Unlinking stale socket /var/run/supervisor.sock”</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">unlink &#x2F;var&#x2F;run&#x2F;supervisor.sock</span><br></pre></td></tr></table></figure>
+
+<h4 id="错误：unix-var-run-supervisor-supervisor-sock-no-such-file"><a href="#错误：unix-var-run-supervisor-supervisor-sock-no-such-file" class="headerlink" title="错误：unix:///var/run/supervisor/supervisor.sock no such file"></a>错误：unix:///var/run/supervisor/supervisor.sock no such file</h4><p>1.修改权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo chmod 777 &#x2F;run</span><br><span class="line">sudo chmod 777 &#x2F;var&#x2F;log</span><br></pre></td></tr></table></figure>
+<p>2.创建supervisor.sock</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo touch &#x2F;var&#x2F;run&#x2F;supervisor.sock</span><br><span class="line">sudo chmod 777 &#x2F;var&#x2F;run&#x2F;supervisor.sock</span><br></pre></td></tr></table></figure>
+<p>类似情况也是创建之后再赋权限</p>
+<h4 id="错误-lt-class-‘socket-error’-gt-Errno-2-No-such-file-or-directory-file-usr-lib-python2-7-socket-py-line-228"><a href="#错误-lt-class-‘socket-error’-gt-Errno-2-No-such-file-or-directory-file-usr-lib-python2-7-socket-py-line-228" class="headerlink" title="错误: &lt;class ‘socket.error’&gt;, [Errno 2] No such file or directory: file: /usr/lib/python2.7/socket.py line: 228"></a>错误: &lt;class ‘socket.error’&gt;, [Errno 2] No such file or directory: file: /usr/lib/python2.7/socket.py line: 228</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo supervisord -c &#x2F;etc&#x2F;supervisor&#x2F;supervisord.conf</span><br><span class="line">sudo supervisorctl -c &#x2F;etc&#x2F;supervisor&#x2F;supervisord.conf</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
     <title>Hello World</title>
     <url>/2020/01/06/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
